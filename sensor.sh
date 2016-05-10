@@ -146,7 +146,7 @@ fi
 if [ -f /etc/debian_version ]; then
     apt-get -y update &>> $logfile
     print_notification "Installing required packages via apt-get.."
-    apt-get -y install python-dev python-openssl python-pyasn1 authbind git libcurl4-gnutls-dev libssl-dev libffi-dev openssh-server&>> $logfile
+    apt-get -y install python-dev python-openssl python-pyasn1 authbind git libcurl4-gnutls-dev libssl-dev libffi-dev openssh-server iptables-persistent&>> $logfile
     error_check 'Apt Package Installation'
     
     curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" &>> $logfile
@@ -156,6 +156,7 @@ if [ -f /etc/debian_version ]; then
     pip install pycrypto cryptography service_identity requests ipwhois twisted &>> $logfile
     error_check 'Python pip'
     iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222
+    iptables-save > /etc/iptables/rules.v4
 elif [ -f /etc/redhat-release ]; then
     yum -y update &>> $logfile
     print_notification "Installing required packages via yum.."
