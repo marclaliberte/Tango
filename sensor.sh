@@ -204,7 +204,7 @@ chown -R splunk:splunk /home/splunk &>> $logfile
 
 ########################################
 
-# Adding splunk user for service to run as. Shell is set to /bin/false.
+# Adding cowrie user for service to run as. Shell is set to /bin/false.
 
 print_status "Checking for cowrie user and group.."
 
@@ -228,6 +228,9 @@ else
     
 fi
 
+# Add splunk user to cowrie group
+usermod -a -G cowrie splunk
+
 chown -R splunk:splunk /home/splunk &>> $logfile
 
 ########################################
@@ -240,6 +243,8 @@ git clone https://github.com/micheloosterhof/cowrie.git &>> $logfile
 error_check "Cloned Cowrie Repository from GitHub"
 cd cowrie
 cp cowrie.cfg.dist cowrie.cfg &>> $logfile
+# Set cowrie log permissions
+sed -i "s/0077/0027/" start.sh &>> $logfile
 # Changing the Honeypot name as well as changing the port that Kippo listens on
 #sed -i "s/#listen_port = 2222/listen_port = 22/" cowrie.cfg &>> $logfile
 #sed -i "s/#\[database_jsonlog\]/\[database_jsonlog\]/" cowrie.cfg &>> $logfile
@@ -323,7 +328,7 @@ sed -i "s/test/$SPLUNK_INDEXER/" outputs.conf &>> $logfile
 chown -R splunk:splunk /opt/splunkforwarder &>> $logfile
 /opt/splunkforwarder/bin/splunk restart &>> $logfile
 error_check 'Tango_input installation'
-sudo -u cowrie chmod 777 /opt/cowrie/log/cowrie.json
+#sudo -u cowrie chmod 777 /opt/cowrie/log/cowrie.json
 
 print_notification "If the location of your kippo log files changes or the hostname/ip of the indexer changes, you will need to modify /opt/splunkfowarder/etc/apps/tango_input/default/inputs.conf and outputs.conf respectively."
 
